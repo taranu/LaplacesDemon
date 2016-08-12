@@ -1,5 +1,17 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
-* text eol=lf
+* text eol=auto
+
+# Basic .gitattributes for a R repo.
+
+# Source files
+# ============
+*.Rdata text
+*.rdb   binary
+*.rds   binary
+*.Rd    text
+*.Rdx   binary
+*.Rmd	text
+*.R     text
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
