@@ -103,6 +103,7 @@ mcmcthmc <- function(Model, Data, Iterations, Status, Thinning, Specs,
   out <- list(Acceptance=Acceptance,
               Dev=Dev,
               DiagCovar=matrix(epsilon, 1, LIV),
+              Iterations=iter,
               Mon=Mon,
               thinned=thinned,
               VarCov=cov(thinned))

@@ -89,6 +89,7 @@ mcmcusmwg <- function(Model, Data, Iterations, Status, Thinning, Specs,
   out <- list(Acceptance=mean(as.vector(Acceptance[dynsample])),
               Dev=Dev,
               DiagCovar=DiagCovar,
+              Iterations=iter,
               Mon=Mon,
               thinned=thinned,
               VarCov=tuning)

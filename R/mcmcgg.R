@@ -71,7 +71,12 @@ mcmcgg <- function(Model, Data, Iterations, Status, Thinning, Specs,
         Mon[t.iter, ] <- Mo0[["Monitor"]]}}
       if(exceededmaxtime(time1, MaxWalltime, iter)) break
     }
-  out <- list(Acceptance=Iterations, Dev=Dev, DiagCovar=DiagCovar,
-              Mon=Mon, thinned=thinned, VarCov=.colVars(thinned))
+  out <- list(Acceptance=iter, 
+              Dev=Dev, 
+              DiagCovar=DiagCovar,
+              Iterations=iter,
+              Mon=Mon, 
+              thinned=thinned, 
+              VarCov=.colVars(thinned))
   return(out)
 }

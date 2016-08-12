@@ -72,6 +72,7 @@ mcmcsmwg <- function(Model, Data, Iterations, Status, Thinning, Specs,
   out <- list(Acceptance=mean(as.vector(Acceptance)),
               Dev=Dev,
               DiagCovar=DiagCovar,
+              Iterations=iter,
               Mon=Mon,
               thinned=thinned,
               VarCov=tuning)
