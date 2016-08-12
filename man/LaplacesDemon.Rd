@@ -87,6 +87,13 @@ LaplacesDemon.hpc(Model, Data, Initial.Values, Covar=NULL,
     with \code{Iterations}. If computer memory is exceeded, then all
     will be lost. The \code{\link{Combine}} function can be used later
     to combine multiple updates.}
+  \item{MaxWalltime}{This is the maximum running time in minutes. If 
+    this limit is exceeded, iterating will stop even if the specified 
+    \code{Iterations} have not completed yet. This is helpful for 
+    running LaplacesDemon in environments like clusters with runtime 
+    limits for jobs. Default is Inf. Note that the implementation is 
+    not yet tested for some grid-based algorithms which do not appear 
+    to use a loop but use some variant of apply() instead.}
   \item{Status}{This argument accepts an integer between 1 and the
     number of iterations, and indicates how often, in iterations, the
     user would like the status printed to the screen or log
