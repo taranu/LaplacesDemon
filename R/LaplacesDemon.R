@@ -9,7 +9,7 @@
 LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
      Iterations=10000, Status=100, Thinning=10, Algorithm="MWG",
      Specs=list(B=NULL), Debug=list(DB.chol=FALSE, DB.eigen=FALSE,
-     DB.MCSE=FALSE, DB.Model=TRUE), LogFile="", ...)
+     DB.MCSE=FALSE, DB.Model=TRUE), LogFile="", MaxWalltime=Inf, ...)
      {
      cat("\nLaplace's Demon was called on ", date(), "\n", sep="",
           file=LogFile, append=TRUE)
@@ -50,10 +50,13 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
                file=LogFile, append=TRUE)
           Initial.Values <- rep(0, length(Data[["parm.names"]]))}
      Iterations <- round(abs(Iterations))
-     if(Iterations < 11) {
-          Iterations <- 11
+     if(Iterations < 1) {
+          Iterations <- 1
           cat("'Iterations' has been changed to ", Iterations, ".\n",
                sep="", file=LogFile, append=TRUE)}
+     if(is.null(MaxWalltime) || !is.numeric(MaxWalltime) || (length(MaxWalltime) != 1) || !(MaxWalltime > 0))
+       stop("MaxWalltime must be >= 0.", file=LogFile, append=TRUE)
+     else MaxWalltime = MaxWalltime*60
      Status <- round(abs(Status))
      if({Status < 1} || {Status > Iterations}) {
           Status <- Iterations
@@ -1232,184 +1235,184 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
      options(warn=2)
      on.exit(options(warn=0))
      if(Algorithm == "Adaptive Directional Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcadmg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcadmg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Adaptive Griddy-Gibbs") {
-          mcmc.out <- .mcmcagg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcagg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, Debug, LogFile)}
      else if(Algorithm == "Adaptive Hamiltonian Monte Carlo") {
-          mcmc.out <- .mcmcahmc(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcahmc(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Affine-Invariant Ensemble Sampler") {
-          mcmc.out <- .mcmcaies(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcaies(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Adaptive Metropolis") {
-          mcmc.out <- .mcmcam(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcam(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Adaptive-Mixture Metropolis" & !is.list(VarCov)) {
-          mcmc.out <- .mcmcamm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcamm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Adaptive-Mixture Metropolis" & is.list(VarCov)) {
-          mcmc.out <- .mcmcamm.b(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcamm.b(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Adaptive Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcamwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcamwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, Debug, LogFile)}
      else if(Algorithm == "Automated Factor Slice Sampler") {
-          mcmc.out <- .mcmcafss(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcafss(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Componentwise Hit-And-Run Metropolis") {
-          mcmc.out <- .mcmccharm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmccharm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Delayed Rejection Adaptive Metropolis") {
-          mcmc.out <- .mcmcdram(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcdram(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Delayed Rejection Metropolis") {
-          mcmc.out <- .mcmcdrm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcdrm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Differential Evolution Markov Chain") {
-          mcmc.out <- .mcmcdemc(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcdemc(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Elliptical Slice Sampler") {
-          mcmc.out <- .mcmcess(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcess(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Experimental") {
-#          mcmc.out <- .mcmcexperimental(Model, Data, Iterations, Status,
+#          mcmc.out <- mcmcexperimental(Model, Data, Iterations, Status,
 #               Thinning, Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0,
 #               ScaleF, thinned, Debug, LogFile)}
           stop("Experimental function not found.", file=LogFile,
                append=TRUE)}
      else if(Algorithm == "Gibbs Sampler") {
-          mcmc.out <- .mcmcgibbs(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcgibbs(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, Debug, LogFile)}
      else if(Algorithm == "Griddy-Gibbs") {
-          mcmc.out <- .mcmcgg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcgg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Hamiltonian Monte Carlo") {
-          mcmc.out <- .mcmchmc(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmchmc(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Hamiltonian Monte Carlo with Dual-Averaging") {
-          mcmc.out <- .mcmchmcda(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmchmcda(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Hit-And-Run Metropolis") {
-          mcmc.out <- .mcmcharm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcharm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Independence Metropolis") {
-          mcmc.out <- .mcmcim(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcim(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Interchain Adaptation") {
-          mcmc.out <- .mcmcinca(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcinca(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Metropolis-Adjusted Langevin Algorithm") {
-          mcmc.out <- .mcmcmala(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcmala(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Metropolis-Coupled Markov Chain Monte Carlo") {
-          mcmc.out <- .mcmcmcmcmc(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcmcmcmc(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Multiple-Try Metropolis") {
-          mcmc.out <- .mcmcmtm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcmtm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, thinned,
                tuning, Debug, LogFile)}
      else if(Algorithm == "Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcmwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcmwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, Debug, LogFile)}
      else if(Algorithm == "No-U-Turn Sampler") {
-          mcmc.out <- .mcmcnuts(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcnuts(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Oblique Hyperrectangle Slice Sampler") {
-          mcmc.out <- .mcmcohss(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcohss(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Preconditioned Crank-Nicolson") {
-          mcmc.out <- .mcmcpcn(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcpcn(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Random Dive Metropolis-Hastings") {
-          mcmc.out <- .mcmcrdmh(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcrdmh(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Random-Walk Metropolis") {
-          mcmc.out <- .mcmcrwm(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcrwm(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, VarCov, Debug, LogFile)}
      else if(Algorithm == "Refractive Sampler") {
-          mcmc.out <- .mcmcrefractive(Model, Data, Iterations, Status,
+          mcmc.out <- mcmcrefractive(Model, Data, Iterations, Status,
                Thinning, Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Reflective Slice Sampler") {
-          mcmc.out <- .mcmcrss(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcrss(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, thinned,
                Debug, LogFile)}
      else if(Algorithm == "Reversible-Jump") {
-          mcmc.out <- .mcmcrj(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcrj(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Robust Adaptive Metropolis") {
-          mcmc.out <- .mcmcram(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcram(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Sequential Adaptive Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcsamwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcsamwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, parm.names=Data[["parm.names"]], Debug,
                LogFile)}
      else if(Algorithm == "Sequential Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcsmwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcsmwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, parm.names=Data[["parm.names"]], Debug,
                LogFile)}
      else if(Algorithm == "Stochastic Gradient Langevin Dynamics") {
-          mcmc.out <- .mcmcsgld(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcsgld(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Slice Sampler") {
-          mcmc.out <- .mcmcslice(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcslice(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Tempered Hamiltonian Monte Carlo") {
-          mcmc.out <- .mcmcthmc(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcthmc(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "t-walk") {
-          mcmc.out <- .mcmctwalk(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmctwalk(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, Debug, LogFile)}
      else if(Algorithm == "Univariate Eigenvector Slice Sampler") {
-          mcmc.out <- .mcmcuess(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcuess(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, VarCov, Debug, LogFile)}
      else if(Algorithm == "Updating Sequential Adaptive Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcusamwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcusamwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, parm.names=Data[["parm.names"]], Debug,
                LogFile)}
      else if(Algorithm == "Updating Sequential Metropolis-within-Gibbs") {
-          mcmc.out <- .mcmcusmwg(Model, Data, Iterations, Status, Thinning,
+          mcmc.out <- mcmcusmwg(Model, Data, Iterations, Status, Thinning,
                Specs, Acceptance, Dev, DiagCovar, LIV, Mon, Mo0, ScaleF,
                thinned, tuning, parm.names=Data[["parm.names"]], Debug,
                LogFile)}
@@ -1422,6 +1425,11 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
      Mon <- mcmc.out$Mon
      thinned <- mcmc.out$thinned
      VarCov <- mcmc.out$VarCov
+     # TODO: Actually filter all of the results
+     if(!is.null(mcmc.out$Iterations)) {
+       unfinishediters <- TRUE
+       Iterations <- mcmc.out$Iterations
+     }
      remove(mcmc.out)
      rownames(DiagCovar) <- NULL
      colnames(DiagCovar) <- Data[["parm.names"]]
