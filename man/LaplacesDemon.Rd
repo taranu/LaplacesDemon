@@ -16,7 +16,8 @@
 LaplacesDemon(Model, Data, Initial.Values, Covar=NULL, Iterations=10000,
      Status=100, Thinning=10, Algorithm="MWG", Specs=list(B=NULL),
      Debug=list(DB.chol=FALSE, DB.eigen=FALSE, DB.MCSE=FALSE,
-     DB.Model=TRUE), LogFile="", ...)
+     DB.Model=TRUE), LogFile="", MaxWalltime=Inf,
+     CheckDataMatrixRanks=TRUE, ...)
 LaplacesDemon.hpc(Model, Data, Initial.Values, Covar=NULL,
      Iterations=10000, Status=100, Thinning=10, Algorithm="MWG",
      Specs=list(B=NULL), Debug=list(DB.chol=FALSE, DB.eigen=FALSE,
@@ -151,6 +152,18 @@ LaplacesDemon.hpc(Model, Data, Initial.Values, Covar=NULL,
     so allows the user to check the progress in the log. A number of log
     files are created, one for each chain, and one for the overall
     process.}
+  \item{MaxWalltime}{The maximum allowed running time in minutes.
+    Supported samplers will terminate once the running time exceeds
+    this value. Unfortunately, grid samplers are currently not supported
+    and some of the return matrices may be incomplete; e.g. the 
+    Posterior matrices will only have rows filled in to Iterations,
+    and the Thinned matrices are not change at all. Default value is Inf.
+    }
+  \item{CheckDataMatrixRanks}{Logical; should LaplacesDemon check any
+    the ranks of any matrices in Data? Default value is TRUE. Can be set
+    to FALSE to avoid time-consuming analysis of very large matrices used
+    in likelihoods, such as images and/or uncertainties thereof.
+    }
   \item{Chains}{This argument is required only for
     \code{LaplacesDemon.hpc}, and indicates the number of parallel
     chains.}

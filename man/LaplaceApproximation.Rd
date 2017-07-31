@@ -15,7 +15,8 @@
 \usage{
 LaplaceApproximation(Model, parm, Data, Interval=1.0E-6,
      Iterations=100, Method="SPG", Samples=1000, CovEst="Hessian",
-     sir=TRUE, Stop.Tolerance=1.0E-5, CPUs=1, Type="PSOCK")
+     sir=TRUE, Stop.Tolerance=1.0E-5, CheckDataMatrixRanks=TRUE,
+     MaxWalltime=Inf, CPUs=1, Type="PSOCK")
 }
 \arguments{
   \item{Model}{This required argument receives the model from a
@@ -135,6 +136,18 @@ LaplaceApproximation(Model, parm, Data, Interval=1.0E-6,
     and another common criterion is the Euclidean norm of the
     differences between the current and previous parameter values.
     Several algorithms have other, specific tolerances.}
+  \item{MaxWalltime}{The maximum allowed running time in minutes.
+    Supported samplers will terminate once the running time exceeds
+    this value. Unfortunately, grid samplers are currently not supported
+    and some of the return matrices may be incomplete; e.g. the 
+    Posterior matrices will only have rows filled in to Iterations,
+    and the Thinned matrices are not change at all. Default value is Inf.
+    }
+  \item{CheckDataMatrixRanks}{Logical; should LaplacesDemon check any
+    the ranks of any matrices in Data? Default value is TRUE. Can be set
+    to FALSE to avoid time-consuming analysis of very large matrices used
+    in likelihoods, such as images and/or uncertainties thereof.
+    }
   \item{CPUs}{This argument accepts an integer that specifies the number
     of central processing units (CPUs) of the multicore computer or
     computer cluster. This argument defaults to \code{CPUs=1}, in which
