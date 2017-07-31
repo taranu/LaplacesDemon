@@ -9,7 +9,8 @@
 LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
      Iterations=10000, Status=100, Thinning=10, Algorithm="MWG",
      Specs=list(B=NULL), Debug=list(DB.chol=FALSE, DB.eigen=FALSE,
-     DB.MCSE=FALSE, DB.Model=TRUE), LogFile="", MaxWalltime=Inf, ...)
+     DB.MCSE=FALSE, DB.Model=TRUE), LogFile="", MaxWalltime=Inf,
+     CheckDataMatrixRanks=TRUE, ...)
      {
      cat("\nLaplace's Demon was called on ", date(), "\n", sep="",
           file=LogFile, append=TRUE)
@@ -29,14 +30,21 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
           stop("In Data, mon.names is NULL.", file=LogFile, append=TRUE)
      if(is.null(Data[["parm.names"]]))
           stop("In Data, parm.names is NULL.", file=LogFile, append=TRUE)
-     for (i in 1:length(Data)) {
+     if(CheckDataMatrixRanks)
+     {
+        for (i in 1:length(Data)) {
           if(is.matrix(Data[[i]])) {
-               if(all(is.finite(Data[[i]]))) {
-                    mat.rank <- qr(Data[[i]], tol=1e-10)$rank
-                    if(mat.rank < ncol(Data[[i]])) {
-                         cat("WARNING: Matrix", names(Data)[[i]],
-                              "may be rank-deficient.\n", file=LogFile,
-                              append=TRUE)}}}}
+             if(all(is.finite(Data[[i]]))) {
+                mat.rank <- qr(Data[[i]], tol=1e-10)$rank
+                if(mat.rank < ncol(Data[[i]])) {
+                     cat("WARNING: Matrix", names(Data)[[i]],
+                          "may be rank-deficient.\n", file=LogFile,
+                          append=TRUE)
+                }
+             }
+          }
+        }
+     }
      if(missing(Initial.Values)) {
           cat("WARNING: Initial Values were not supplied.\n", file=LogFile,
                append=TRUE)
@@ -1475,10 +1483,11 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
           ESS1[j] <- ESS(thinned[,j])
           Rec.Thin[j] <- which(acf.temp[,j] <= 0.1)[1]*Thinning}
      Rec.Thin[which(is.na(Rec.Thin))] <- nrow(acf.temp)
-     ESS3 <- ESS(Mon)
+     Num.Mon <- ncol(Mon)
+     ESS3 <- NULL
+     if(Num.Mon > 0) ESS3 <- ESS(Mon)
      ### Posterior Summary Table 1: All Thinned Samples
      cat("Creating Summaries\n", file=LogFile, append=TRUE)
-     Num.Mon <- ncol(Mon)
      Summ1 <- matrix(NA, LIV, 7, dimnames=list(Data[["parm.names"]],
           c("Mean","SD","MCSE","ESS","LB","Median","UB")))
      Summ1[,1] <- colMeans(thinned)
@@ -1512,32 +1521,35 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
      Deviance[6] <- as.numeric(quantile(Dev, probs=0.500, na.rm=TRUE))
      Deviance[7] <- as.numeric(quantile(Dev, probs=0.975, na.rm=TRUE))
      Summ1 <- rbind(Summ1, Deviance)
-     for (j in 1:Num.Mon) {
-          Monitor <- rep(NA,7)
-          Monitor[1] <- mean(Mon[,j])
-          Monitor[2] <- sd(as.vector(Mon[,j]))
-          temp <- try(MCSE(as.vector(Mon[,j])), silent=!Debug[["DB.MCSE"]])
-          if(inherits(temp, "try-error")) {
-               if(Debug[["DB.MCSE"]] == TRUE)
-                    cat("MCSE of", Data[["mon.names"]][j],
-                         "failed in Summary1\n", file=LogFile, append=TRUE)
-               temp <- MCSE(Mon[,j], method="sample.variance")}
-          Monitor[3] <- temp
-          Monitor[4] <- ESS3[j]
-          Monitor[5] <- as.numeric(quantile(Mon[,j], probs=0.025,
-               na.rm=TRUE))
-          Monitor[6] <- as.numeric(quantile(Mon[,j], probs=0.500,
-               na.rm=TRUE))
-          Monitor[7] <- as.numeric(quantile(Mon[,j], probs=0.975,
-               na.rm=TRUE))
-          Summ1 <- rbind(Summ1, Monitor)
-          rownames(Summ1)[nrow(Summ1)] <- Data[["mon.names"]][j]}
+     if(Num.Mon > 0) {
+       for (j in 1:Num.Mon) {
+            Monitor <- rep(NA,7)
+            Monitor[1] <- mean(Mon[,j])
+            Monitor[2] <- sd(as.vector(Mon[,j]))
+            temp <- try(MCSE(as.vector(Mon[,j])), silent=!Debug[["DB.MCSE"]])
+            if(inherits(temp, "try-error")) {
+                 if(Debug[["DB.MCSE"]] == TRUE)
+                      cat("MCSE of", Data[["mon.names"]][j],
+                           "failed in Summary1\n", file=LogFile, append=TRUE)
+                 temp <- MCSE(Mon[,j], method="sample.variance")}
+            Monitor[3] <- temp
+            Monitor[4] <- ESS3[j]
+            Monitor[5] <- as.numeric(quantile(Mon[,j], probs=0.025,
+                 na.rm=TRUE))
+            Monitor[6] <- as.numeric(quantile(Mon[,j], probs=0.500,
+                 na.rm=TRUE))
+            Monitor[7] <- as.numeric(quantile(Mon[,j], probs=0.975,
+                 na.rm=TRUE))
+            Summ1 <- rbind(Summ1, Monitor)
+            rownames(Summ1)[nrow(Summ1)] <- Data[["mon.names"]][j]}
+     }
      rm(ESS3)
      ### Posterior Summary Table 2: Stationary Samples
      Summ2 <- matrix(NA, LIV, 7, dimnames=list(Data[["parm.names"]],
           c("Mean","SD","MCSE","ESS","LB","Median","UB")))
      if(Stat.at < thinned.rows) {
-          ESS6 <- ESS(Mon[Stat.at:thinned.rows,])
+          ESS6 <- NULL
+          if(Num.Mon > 0) ESS6 <- ESS(Mon[Stat.at:thinned.rows,])
           thinned2 <- matrix(thinned[Stat.at:thinned.rows,],
                thinned.rows-Stat.at+1, ncol(thinned))
           Dev2 <- matrix(Dev[Stat.at:thinned.rows,],
@@ -1579,30 +1591,32 @@ LaplacesDemon <- function(Model, Data, Initial.Values, Covar=NULL,
           Deviance[7] <- as.numeric(quantile(Dev2, probs=0.975,
                na.rm=TRUE))
           Summ2 <- rbind(Summ2, Deviance)
-          for (j in 1:Num.Mon) {
-               Monitor <- rep(NA,7)
-               Monitor[1] <- mean(Mon2[,j])
-               Monitor[2] <- sd(as.vector(Mon2[,j]))
-               temp <- try(MCSE(as.vector(Mon2[,j])),
-                    silent=!Debug[["DB.MCSE"]])
-               if(inherits(temp, "try-error")) {
-                    if(Debug[["DB.MCSE"]] == TRUE)
-                         cat("MCSE of", Data[["mon.names"]][j],
-                              "failed in Summary2\n", file=LogFile,
-                              append=TRUE)
-                    temp <- MCSE(Mon2[,j], method="sample.variance")}
-               Monitor[3] <- temp
-               Monitor[4] <- ESS6[j]
-               Monitor[5] <- as.numeric(quantile(Mon2[,j],
-                    probs=0.025, na.rm=TRUE))
-               Monitor[6] <- as.numeric(quantile(Mon2[,j],
-                    probs=0.500, na.rm=TRUE))
-               Monitor[7] <- as.numeric(quantile(Mon2[,j],
-                    probs=0.975, na.rm=TRUE))
-               Summ2 <- rbind(Summ2, Monitor)
-               rownames(Summ2)[nrow(Summ2)] <- Data[["mon.names"]][j]}
-          rm(ESS6)
+          if(Num.Mon > 0) {
+            for (j in 1:Num.Mon) {
+                 Monitor <- rep(NA,7)
+                 Monitor[1] <- mean(Mon2[,j])
+                 Monitor[2] <- sd(as.vector(Mon2[,j]))
+                 temp <- try(MCSE(as.vector(Mon2[,j])),
+                      silent=!Debug[["DB.MCSE"]])
+                 if(inherits(temp, "try-error")) {
+                      if(Debug[["DB.MCSE"]] == TRUE)
+                           cat("MCSE of", Data[["mon.names"]][j],
+                                "failed in Summary2\n", file=LogFile,
+                                append=TRUE)
+                      temp <- MCSE(Mon2[,j], method="sample.variance")}
+                 Monitor[3] <- temp
+                 Monitor[4] <- ESS6[j]
+                 Monitor[5] <- as.numeric(quantile(Mon2[,j],
+                      probs=0.025, na.rm=TRUE))
+                 Monitor[6] <- as.numeric(quantile(Mon2[,j],
+                      probs=0.500, na.rm=TRUE))
+                 Monitor[7] <- as.numeric(quantile(Mon2[,j],
+                      probs=0.975, na.rm=TRUE))
+                 Summ2 <- rbind(Summ2, Monitor)
+                 rownames(Summ2)[nrow(Summ2)] <- Data[["mon.names"]][j]}
           }
+          rm(ESS6)
+        }
      ### Column names to samples
      if(identical(ncol(Mon), length(Data[["mon.names"]])))
           colnames(Mon) <- Data[["mon.names"]]
