@@ -1,3 +1,7 @@
+gettime <- function() {
+  return(proc.time()["elapsed"])
+}
+
 exceededmaxtime <- function(starttime, maxtime, iter) {
-  return((proc.time()["elapsed"] - starttime)*(iter+1)/iter > maxtime)
+  return((gettime() - starttime)*(iter+1)/iter > maxtime)
 }
